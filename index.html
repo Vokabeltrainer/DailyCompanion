@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Daily Companion</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 10vh;
+            margin: 0;
+            padding: 10px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0d1226 100%);
+            color: #FFFFFF;
+            overflow-y: auto;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background: rgba(15, 15, 25, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+            padding: 25px; /* Reduced padding */
+            width: 98%;
+            max-width: 450px;
+            box-sizing: border-box;
+            border: 1px solid rgba(30, 30, 45, 0.8);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Stats Overview Styling */
+        .stats-overview {
+            display: flex;
+            flex-wrap: nowrap; /* Prevent wrapping to keep in one line */
+            justify-content: space-around;
+            align-items: flex-start;
+            gap: 5px;
+            margin-bottom: 30px;
+            padding: 10px;
+            background-color: rgba(25, 25, 45, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(40, 40, 65, 0.9);
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            flex: 1;
+            min-width: 0;
+            text-align: center;
+            color: #b0e0e6;
+            font-weight: 500;
+            padding: 3px;
+        }
+
+        .stat-item .icon {
+            font-size: 1.6em;
+            margin-bottom: 3px;
+            color: #4facfe;
+            line-height: 1;
+        }
+
+        .stat-item .value {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #FFFFFF;
+            line-height: 1.2;
+        }
+
+        .category-item {
+            margin-bottom: 30px;
+            background-color: rgba(25, 25, 45, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(40, 40, 65, 0.9);
+        }
+
+        .category-item label {
+            display: block;
+            font-size: 1.4em;
+            font-weight: 600;
+            color: #b0e0e6;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Zeitskala Styling mit Icons */
+        .time-input-group {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        .time-entry {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2em;
+            color: #FFFFFF;
+        }
+
+        .time-entry .icon {
+            font-size: 1.6em;
+            line-height: 1;
+        }
+
+        .time-entry input[type="time"] {
+            background-color: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: #FFFFFF;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1em;
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+            -webkit-appearance: none;
+            appearance: none;
+            width: 120px;
+            text-align: center;
+        }
+
+        .time-entry input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+        .time-entry input[type="time"]::-moz-time-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .sleep-duration {
+            font-size: 1.2em;
+            color: #00f2fe;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* Sport Checkboxen Styling */
+        .sport-options-group {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .sport-checkbox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            padding: 0 12px; /* Adjusted padding to accommodate new height */
+            background-color: #2a2a4a;
+            border: 1px solid #45456a;
+            border-radius: 10px;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            color: #FFFFFF;
+            font-weight: 500;
+            min-width: 80px;
+            height: 30px; /* Reduced height */
+            text-align: center;
+            font-size: 0.85em;
+        }
+
+        .sport-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .sport-checkbox .icon {
+            font-size: 1em; /* Adjusted icon size */
+            line-height: 1;
+            margin-bottom: 0;
+        }
+
+        /* Highlight für ausgewählte Sport-Icons */
+        .sport-checkbox.selected .icon { /* Changed to class 'selected' on parent label */
+            color: #2ecc71; /* Green color for selected icon */
+            text-shadow: 0 0 15px rgba(46, 204, 113, 0.8); /* Stronger green glow */
+        }
+        .sport-checkbox.selected { /* Changed to class 'selected' on parent label */
+            background-color: #2a2a4a; /* Keep background same, highlight with border/shadow */
+            border-color: #27ae60;
+            box-shadow: 0 0 0 3px rgba(46, 204, 113, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5); /* Stronger green border + shadow */
+        }
+
+
+        .sport-checkbox:hover {
+            background-color: #3a3a5a;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* RATING SKALA OPTIK */
+        .rating-scale {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            flex-wrap: nowrap;
+            padding: 5px;
+        }
+
+        .rating-box {
+            min-width: 35px;
+            height: 38px;
+            background-color: #2a2a4a;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #b0b0e0;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        .rating-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        .rating-box.selected {
+            color: #FFFFFF;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transform: scale(1.05);
+        }
+
+        .rating-box.selected[data-value="1"],
+        .rating-box.selected[data-value="2"],
+        .rating-box.selected[data-value="3"] {
+            background-color: #e74c3c;
+        }
+
+        .rating-box.selected[data-value="4"],
+        .rating-box.selected[data-value="5"],
+        .rating-box.selected[data-value="6"] {
+            background-color: #f39c12;
+        }
+
+        .rating-box.selected[data-value="7"],
+        .rating-box.selected[data-value="8"],
+        .rating-box.selected[data-value="9"],
+        .rating-box.selected[data-value="10"] {
+            background-color: #2ecc71;
+        }
+
+        .overall-average-display {
+            font-size: 2em;
+            font-weight: 700;
+            text-align: center;
+            color: #00f2fe;
+            margin-top: 20px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 18px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #fff;
+            background: linear-gradient(45deg, #a770ef 0%, #cf8bf3 50%, #f297a7 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .submit-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Responsive Anpassungen */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            .container {
+                padding: 15px; /* Adjusted padding for smaller screens */
+                width: 100%;
+                margin-top: 5px;
+                margin-bottom: 5px;
+            }
+
+            h1 {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+
+            .stats-overview {
+                padding: 8px;
+                margin-bottom: 20px;
+                gap: 3px;
+            }
+
+            .stat-item {
+                min-width: unset;
+                flex: 1;
+                padding: 2px;
+            }
+
+            .stat-item .icon {
+                font-size: 1.5em;
+            }
+
+            .stat-item .value {
+                font-size: 0.8em;
+            }
+
+            .category-item {
+                padding: 15px;
+                margin-bottom: 15px;
+            }
+
+            .category-item label {
+                font-size: 1.3em;
+                margin-bottom: 15px;
+            }
+
+            .time-input-group {
+                flex-direction: row;
+                gap: 8px;
+                justify-content: center;
+            }
+
+            .time-entry {
+                font-size: 1.1em;
+            }
+            .time-entry input[type="time"] {
+                font-size: 0.9em;
+                padding: 6px 10px;
+                width: 90px;
+            }
+
+            .sleep-duration {
+                font-size: 1.1em;
+            }
+
+            .sport-options-group {
+                gap: 10px;
+            }
+
+            .sport-checkbox {
+                padding: 0 10px; /* Adjusted padding for new height on mobile */
+                font-size: 0.8em;
+                min-width: 70px;
+                height: 30px; /* Reduced height on mobile */
+            }
+
+            .sport-checkbox .icon {
+                font-size: 1em; /* Adjusted icon size for mobile */
+            }
+
+            .rating-scale {
+                gap: 3px;
+                flex-wrap: nowrap;
+            }
+
+            .rating-box {
+                min-width: 28px;
+                height: 32px;
+                font-size: 0.9em;
+            }
+
+            .overall-average-display {
+                font-size: 1.8em;
+            }
+
+            .submit-button {
+                padding: 15px;
+                font-size: 1.3em;
+            }
+        }
+
+        /* Popup Styles */
+        .overlay {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup {
+            background: rgba(25, 25, 45, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            width: 90%;
+            max-width: 400px;
+            box-sizing: border-box;
+            color: #FFFFFF;
+            position: relative;
+            max-height: 80vh;
+            overflow-y: auto; /* Enable scrolling for content */
+            border: 1px solid rgba(40, 40, 65, 0.9);
+            animation: fadeInScale 0.3s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .popup h2 {
+            font-size: 2em;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .popup-content p {
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            line-height: 1.4;
+        }
+
+        .popup-content strong {
+            color: #00f2fe; /* Highlight category names */
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.8em;
+            color: #bbb;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .close-btn:hover {
+            color: #fff;
+        }
+
+        /* Responsive for Popup */
+        @media (max-width: 480px) {
+            .popup {
+                padding: 20px;
+                width: 95%;
+            }
+            .popup h2 {
+                font-size: 1.7em;
+            }
+            .popup-content p {
+                font-size: 1em;
+            }
+            .close-btn {
+                font-size: 1.5em;
+                top: 10px;
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Companion</h1>
+
+        <div class="stats-overview">
+            <div class="stat-item">
+                <span class="icon">🌡️</span>
+                <div class="value" id="minTemp">Min: --°C</div>
+                <div class="value" id="maxTemp">Max: --°C</div>
+            </div>
+            <div class="stat-item">
+                <span class="icon">🌬️</span>
+                <div class="value" id="airQuality">AQI: --</div>
+            </div>
+            <div class="stat-item">
+                <span class="icon">🌕</span>
+                <div class="value" id="moonPhase">Phase: --</div>
+            </div>
+            <div class="stat-item">
+                <span class="icon">🌼</span>
+                <div class="value" id="pollenCount">Pollen: --</div>
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label>Zeiten heute</label>
+            <div class="time-input-group">
+                <div class="time-entry">
+                    <span class="icon">☀️</span>
+                    <input type="time" id="wakeUpTime">
+                </div>
+                <div class="time-entry">
+                    <span class="icon">🌙</span>
+                    <input type="time" id="bedTime">
+                </div>
+            </div>
+            <div class="sleep-duration" id="sleepDurationDisplay"></div>
+        </div>
+
+        <div class="category-item">
+            <label>Sport</label>
+            <div class="sport-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportGym" data-sport-type="active" data-sport-name="Fitnessstudio">
+                    <span class="icon">🥇</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportFootball" data-sport-type="active" data-sport-name="Fußball">
+                    <span class="icon">⚽</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="sportNone" data-sport-type="none" data-sport-name="Kein Sport">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label for="mood-rating">Stimmung</label>
+            <div class="rating-scale" id="mood-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="neck-pain-rating">Schmerzen Nacken</label>
+            <div class="rating-scale" id="neck-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="upper-body-pain-rating">Schmerzen Oberkörper</label>
+            <div class="rating-scale" id="upper-body-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label for="lower-body-pain-rating">Schmerzen Unterkörper</label>
+            <div class="rating-scale" id="lower-body-pain-rating"></div>
+        </div>
+
+        <div class="category-item">
+            <label>Gesamttagesbilanz</label>
+            <div class="overall-average-display" id="overallAverageDisplay">--</div>
+        </div>
+
+        <button class="submit-button" id="submitBtn">Speichern</button>
+    </div>
+
+    <div class="overlay" id="popupOverlay">
+        <div class="popup" id="dataPopup">
+            <span class="close-btn" id="closePopupBtn">&times;</span>
+            <h2>Ihre Eingaben</h2>
+            <div class="popup-content" id="popupContent">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Funktion zum Generieren der Rating-Felder (1-10)
+        function generateRatingBoxes(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            for (let i = 1; i <= 10; i++) {
+                const box = document.createElement('div');
+                box.classList.add('rating-box');
+                box.dataset.value = i;
+                box.textContent = i;
+                container.appendChild(box);
+
+                box.addEventListener('click', () => {
+                    // Remove 'selected' from all siblings
+                    Array.from(container.children).forEach(b => b.classList.remove('selected'));
+                    // Add 'selected' to the clicked box
+                    box.classList.add('selected');
+                    calculateOverallAverage();
+                });
+            }
+        }
+
+        // Funktion zur Berechnung der Schlafdauer
+        function calculateSleepDuration() {
+            const wakeUpTimeInput = document.getElementById('wakeUpTime');
+            const bedTimeInput = document.getElementById('bedTime');
+            const sleepDurationDisplay = document.getElementById('sleepDurationDisplay');
+
+            const wakeUpTime = wakeUpTimeInput.value;
+            const bedTime = bedTimeInput.value;
+
+            if (wakeUpTime && bedTime) {
+                const wakeUpParts = wakeUpTime.split(':').map(Number);
+                const bedTimeParts = bedTime.split(':').map(Number);
+
+                let bedDate = new Date();
+                bedDate.setHours(bedTimeParts[0], bedTimeParts[1], 0);
+
+                let wakeUpDate = new Date();
+                wakeUpDate.setHours(wakeUpParts[0], wakeUpParts[1], 0);
+
+                if (wakeUpDate < bedDate) {
+                    // If wake-up time is earlier than bed time, assume wake-up is on the next day
+                    wakeUpDate.setDate(wakeUpDate.getDate() + 1);
+                }
+
+                const diffMillis = wakeUpDate.getTime() - bedDate.getTime();
+                const diffHours = diffMillis / (1000 * 60 * 60);
+
+                const hours = Math.floor(diffHours);
+                const minutes = Math.round((diffHours - hours) * 60);
+
+                sleepDurationDisplay.textContent = `Schlaf: ${hours} Std. ${minutes} Min.`;
+            } else {
+                sleepDurationDisplay.textContent = '';
+            }
+        }
+
+        // Funktion zur Berechnung des Gesamtdurchschnitts
+        function calculateOverallAverage() {
+            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating'];
+            let totalRating = 0;
+            let ratingCount = 0;
+
+            ratingCategories.forEach(categoryId => {
+                const selectedBox = document.querySelector(`#${categoryId} .rating-box.selected`);
+                if (selectedBox) {
+                    totalRating += parseInt(selectedBox.dataset.value);
+                    ratingCount++;
+                }
+            });
+
+            const overallAverageDisplay = document.getElementById('overallAverageDisplay');
+            if (ratingCount > 0) {
+                const average = (totalRating / ratingCount).toFixed(1);
+                overallAverageDisplay.textContent = average;
+            } else {
+                overallAverageDisplay.textContent = '--';
+            }
+        }
+
+        // Funktion zum Laden von Wetter- und Umweltdaten (Platzhalter)
+        function loadEnvironmentalStats() {
+            // In einer echten Anwendung würden Sie hier API-Aufrufe machen,
+            // um Daten zu Wetter, Luftqualität, Mondphase und Pollenflug abzurufen.
+            // Zum Beispiel: OpenWeatherMap API für Wetter, OpenAQ für Luftqualität, etc.
+
+            // Beispielwerte (statisch für diese Demo):
+            document.getElementById('minTemp').textContent = 'Min: 10°C';
+            document.getElementById('maxTemp').textContent = 'Max: 22°C';
+            document.getElementById('airQuality').textContent = 'AQI: 40'; // Beispielwert
+            document.getElementById('moonPhase').textContent = 'Zunehmend'; // Beispielwert
+            document.getElementById('pollenCount').textContent = 'Mittel'; // Beispielwert
+        }
+
+        // Funktion zum Anzeigen des Popups mit Daten
+        function showPopup(data) {
+            const popupOverlay = document.getElementById('popupOverlay');
+            const popupContent = document.getElementById('popupContent');
+
+            let popupContentHtml = '<h3>Umweltdaten:</h3>';
+            popupContentHtml += `<p><strong>Temperatur:</strong> ${data.environmentalStats.minTemp} / ${data.environmentalStats.maxTemp}</p>`;
+            popupContentHtml += `<p><strong>Luftqualität:</strong> ${data.environmentalStats.airQuality}</p>`;
+            popupContentHtml += `<p><strong>Mondphase:</strong> ${data.environmentalStats.moonPhase}</p>`;
+            popupContentHtml += `<p><strong>Pollen:</strong> ${data.environmentalStats.pollenCount}</p>`;
+            popupContentHtml += '<hr>'; // Horizontal line for separation
+
+            popupContentHtml += '<h3>Tagesbilanz:</h3>';
+            popupContentHtml += `<p><strong>Aufstehen:</strong> ${data.wakeUpTime || 'Nicht angegeben'}</p>`;
+            popupContentHtml += `<p><strong>Ins Bett:</strong> ${data.bedTime || 'Nicht angegeben'}</p>`;
+            popupContentHtml += `<p><strong>Schlafdauer:</strong> ${data.sleepDuration || 'Nicht berechnet'}</p>`;
+
+            const sportsText = data.selectedSports.length > 0 ? data.selectedSports.join(', ') : 'Keine Auswahl';
+            popupContentHtml += `<p><strong>Sport:</strong> ${sportsText}</p>`;
+
+            popupContentHtml += `<p><strong>Stimmung:</strong> ${data.moodRating ? data.moodRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Nackenschmerzen:</strong> ${data.neckPainRating ? data.neckPainRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Oberkörperschmerzen:</strong> ${data.upperBodyPainRating ? data.upperBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
+            popupContentHtml += '<hr>';
+
+            popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
+
+
+            popupContent.innerHTML = popupContentHtml;
+            popupOverlay.style.display = 'flex';
+        }
+
+        // Funktion zum Schließen des Popups
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Generiere alle Rating-Skalen
+            generateRatingBoxes('mood-rating');
+            generateRatingBoxes('neck-pain-rating');
+            generateRatingBoxes('upper-body-pain-rating');
+            generateRatingBoxes('lower-body-pain-rating');
+
+            // Lade die Umweltdaten (Platzhalter)
+            loadEnvironmentalStats();
+
+            // Event-Listener für Zeit-Inputs
+            document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
+            document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
+
+            // Event-Listener für Sport-Checkboxen
+            const sportCheckboxes = document.querySelectorAll('.sport-checkbox input[type="checkbox"]');
+            sportCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    const label = event.target.closest('.sport-checkbox');
+                    
+                    if (event.target.checked) {
+                        label.classList.add('selected');
+                    } else {
+                        label.classList.remove('selected');
+                    }
+
+                    if (event.target.id === 'sportNone') {
+                        if (event.target.checked) {
+                            // If "Kein Sport" is checked, uncheck all other active sport types
+                            sportCheckboxes.forEach(cb => {
+                                if (cb !== event.target && cb.dataset.sportType === 'active') {
+                                    cb.checked = false;
+                                    cb.closest('.sport-checkbox').classList.remove('selected');
+                                }
+                            });
+                        }
+                    } else if (event.target.dataset.sportType === 'active') {
+                        // If any active sport is checked, uncheck "Kein Sport"
+                        if (event.target.checked) {
+                            const sportNoneCheckbox = document.getElementById('sportNone');
+                            if (sportNoneCheckbox.checked) {
+                                sportNoneCheckbox.checked = false;
+                                sportNoneCheckbox.closest('.sport-checkbox').classList.remove('selected');
+                            }
+                        }
+                    }
+                });
+            });
+
+            // Initial calculation of average
+            calculateOverallAverage();
+
+            // Submit button functionality
+            document.getElementById('submitBtn').addEventListener('click', () => {
+                const wakeUpTime = document.getElementById('wakeUpTime').value;
+                const bedTime = document.getElementById('bedTime').value;
+
+                const selectedSports = Array.from(document.querySelectorAll('.sport-checkbox input[type="checkbox"]:checked'))
+                                         .map(cb => cb.dataset.sportName);
+
+                const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
+                const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
+                const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
+                const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
+
+                const overallAverage = document.getElementById('overallAverageDisplay').textContent;
+
+                // --- Validation Logic ---
+                let missingFields = [];
+
+                if (!wakeUpTime || !bedTime) {
+                    missingFields.push('Aufsteh- und Schlafzeiten');
+                }
+                if (selectedSports.length === 0) {
+                    missingFields.push('Sportart');
+                }
+                if (!moodRating) {
+                    missingFields.push('Stimmung');
+                }
+                if (!neckPainRating) {
+                    missingFields.push('Schmerzen Nacken');
+                }
+                if (!upperBodyPainRating) {
+                    missingFields.push('Schmerzen Oberkörper');
+                }
+                if (!lowerBodyPainRating) {
+                    missingFields.push('Schmerzen Unterkörper');
+                }
+
+                if (missingFields.length > 0) {
+                    alert(`Bitte füllen Sie die folgenden Kategorien aus, bevor Sie speichern:\n\n- ${missingFields.join('\n- ')}`);
+                    return; // Stop execution if validation fails
+                }
+                // --- End Validation Logic ---
+
+
+                const data = {
+                    wakeUpTime,
+                    bedTime,
+                    sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
+                    selectedSports,
+                    moodRating,
+                    neckPainRating,
+                    upperBodyPainRating,
+                    lowerBodyPainRating,
+                    overallAverage: overallAverage !== '--' ? overallAverage : null,
+                    environmentalStats: {
+                        minTemp: document.getElementById('minTemp').textContent,
+                        maxTemp: document.getElementById('maxTemp').textContent,
+                        airQuality: document.getElementById('airQuality').textContent,
+                        moonPhase: document.getElementById('moonPhase').textContent,
+                        pollenCount: document.getElementById('pollenCount').textContent
+                    }
+                };
+
+                console.log('Gesammelte Daten:', data); // Log to console for debugging
+                showPopup(data); // Show the popup
+            });
+
+            // Event-Listener für Popup schließen
+            document.getElementById('closePopupBtn').addEventListener('click', closePopup);
+            document.getElementById('popupOverlay').addEventListener('click', (event) => {
+                if (event.target.id === 'popupOverlay') { // Close only if clicked on overlay, not the popup itself
+                    closePopup();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
