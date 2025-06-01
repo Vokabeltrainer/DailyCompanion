@@ -178,6 +178,15 @@
             margin-top: 15px;
         }
 
+        .painmed-options-group {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
         .sport-checkbox {
             display: flex;
             flex-direction: column;
@@ -391,6 +400,10 @@
                 gap: 10px;
             }
 
+            .painmed-options-group {
+                gap: 10px;
+            }
+
             .sport-checkbox {
                 padding: 0 10px; /* Adjusted padding for new height on mobile */
                 font-size: 0.8em;
@@ -556,6 +569,25 @@
                 </label>
             </div>
         </div>
+
+        <div class="category-item">
+            <label>Schmerzmittel</label>
+            <div class="painmed-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedibu" data-pain-type="active" data-pain-name="IBU">
+                    <span class="icon">💊</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmeddiclo" data-pain-type="active" data-pain-name="Diclo">
+                    <span class="icon">💊</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="painmedNone" data-pain-type="none" data-pain-name="keine">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
 
         <div class="category-item">
             <label for="mood-rating">Stimmung</label>
