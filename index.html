@@ -9,15 +9,16 @@
 
         body {
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 10vh; /* Korrigiert von 100vh auf 10vh basierend auf Original, aber 100vh ist üblicher für Fullscreen-Start */
+            flex-direction: column; /* Setzt die Hauptachse auf Spalte */
+            justify-content: flex-start;
+            align-items: center; /* Zentriert den Inhalt horizontal */
+            min-height: 100vh; /* Mindesthöhe des Bodys auf 100% des Viewports */
             margin: 0;
-            padding: 10px;
+            padding: 0; /* Padding vom Body entfernen, da es zum Scrollen führen kann */
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #0a0a1a 0%, #0d1226 100%);
             color: #FFFFFF;
-            overflow-y: auto;
+            overflow-y: auto; /* Body scrollt den gesamten Inhalt */
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -khtml-user-select: none;
@@ -25,6 +26,28 @@
             -ms-user-select: none;
             user-select: none;
             box-sizing: border-box;
+        }
+
+        .header-fixed {
+            position: sticky; /* Hält den Header am oberen Rand */
+            top: 0; /* Oben ausrichten */
+            width: 100%;
+            background: linear-gradient(135deg, #0a0a1a 0%, #0d1226 100%); /* Gleicher Hintergrund wie Body oder leicht angepasst */
+            padding: 10px 0; /* Padding für den Header */
+            z-index: 100; /* Stellt sicher, dass der Header über anderen Inhalten liegt */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5); /* Leichter Schatten für Tiefeneffekt */
+            text-align: center; /* Zentriert den Titel */
+            margin-bottom: 20px; /* Abstand zum scrollbaren Inhalt */
+        }
+
+        .header-fixed h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            /*margin: 0;  Entfernt Standard-Margin von h1 */
         }
 
         .container {
@@ -35,27 +58,15 @@
             width: 98%;
             max-width: 450px;
             box-sizing: border-box;
-            border: 1px solid rgba(30, 30, 45, 0.8);
+            border: 0px solid rgba(30, 30, 45, 0.8);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            margin-top: 10px;
+            margin-top: 10px; /* Abstand nach oben, falls kein Sticky Header direkt darüber ist */
             margin-bottom: 10px;
+            flex-shrink: 0; /* Verhindert, dass der Container schrumpft */
         }
 
-        h1 {
-            font-size: 2.5em;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 30px;
-            background: linear-gradient(45deg, #00f2fe 0%, #4facfe 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Stats Overview Styling - REMOVED */
-
-
+        /* Restlicher CSS-Code bleibt unverändert */
         .category-item {
             margin-bottom: 30px;
             background-color: rgba(25, 25, 45, 0.9);
@@ -285,23 +296,23 @@
         /* Responsive Anpassungen */
         @media (max-width: 480px) {
             body {
-                padding: 5px;
+                padding: 0; /* Auch hier Padding entfernen */
+            }
+            .header-fixed {
+                padding: 8px 0; /* Angepasstes Padding für kleinen Bildschirmen */
+                margin-bottom: 15px;
+            }
+            .header-fixed h1 {
+                font-size: 2em;
             }
             .container {
                 padding: 15px;
                 width: 100%;
-                margin-top: 5px;
+                margin-top: 0; /* Abstand nach oben entfernen, da Header sticky ist */
                 margin-bottom: 5px;
             }
 
-            h1 {
-                font-size: 2em;
-                margin-bottom: 20px;
-            }
-
-            /* Stats Overview Responsive - REMOVED */
-
-
+            /* Weitere responsive Anpassungen bleiben gleich */
             .category-item {
                 padding: 15px;
                 margin-bottom: 15px;
@@ -331,11 +342,11 @@
                 font-size: 1.1em;
             }
 
-            .sport-options-group, .painmed-options-group { /* NEU: .painmed-options-group hinzugefügt */
+            .sport-options-group, .painmed-options-group {
                 gap: 10px;
             }
 
-            .sport-checkbox { /* Diese Klasse wird auch für Schmerzmittel verwendet */
+            .sport-checkbox {
                 padding: 0 10px;
                 font-size: 0.8em;
                 min-width: 70px;
@@ -465,9 +476,11 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="header-fixed">
         <h1>Daily Companion</h1>
+    </div>
 
+    <div class="container">
         <div class="category-item">
             <label>Schlafzeiten</label>
             <div class="time-input-group">
@@ -640,8 +653,6 @@
             }
         }
 
-        // loadEnvironmentalStats function removed
-
         // Funktion zum Anzeigen des Popups mit Daten
         function showPopup(data) {
             const popupOverlay = document.getElementById('popupOverlay');
@@ -684,8 +695,6 @@
             generateRatingBoxes('shoulder-pain-rating'); // NEU: Für Schulterschmerzen hinzugefügt
             generateRatingBoxes('upper-body-pain-rating');
             generateRatingBoxes('lower-body-pain-rating');
-
-            // loadEnvironmentalStats() call removed
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -793,7 +802,6 @@
                     upperBodyPainRating,
                     lowerBodyPainRating,
                     overallAverage: overallAverage !== '--' ? overallAverage : null,
-                    // environmentalStats removed
                 };
 
                 console.log('Gesammelte Daten:', data);
