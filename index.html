@@ -617,7 +617,26 @@
         </div>
     </div>
 
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
     <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyDaWUtoih3sLcXo0QyKmdKnRFl5CafTjns", // ERSETZE DIES
+            authDomain: "daily-companion-24975.firebaseapp.com", // ERSETZE DIES
+            projectId: "daily-companion-24975", // ERSETZE DIES
+            storageBucket: "daily-companion-24975.firebasestorage.app", // ERSETZE DIES
+            messagingSenderId: "330854991329", // ERSETZE DIES
+            appId: "1:330854991329:web:2d8a4060f8bd50372d3ea0", // ERSETZE DIES
+            measurementId: "G-52MKKC9GCS" // ERSETZE DIES (optional, wenn du Analytics hast)
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // Funktion zum Generieren der Rating-Felder (1-10)
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
@@ -830,7 +849,7 @@
 
             calculateOverallAverage();
 
-            document.getElementById('submitBtn').addEventListener('click', () => {
+            document.getElementById('submitBtn').addEventListener('click', async () => { // "async" hinzugefügt
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
@@ -880,23 +899,34 @@
                 }
 
                 const data = {
+                    date: firebase.firestore.FieldValue.serverTimestamp(), // Speichert den Server-Zeitstempel
                     wakeUpTime,
                     bedTime,
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
                     selectedSports,
                     stretchingStatus,
                     selectedPainmeds,
-                    moodRating,
-                    neckPainRating,
-                    shoulderPainRating,
-                    upperBodyPainRating,
-                    lowerBodyPainRating,
-                    overallAverage: overallAverage !== '--' ? overallAverage : null,
+                    moodRating: moodRating ? parseInt(moodRating) : null, // Ratings als Zahlen speichern
+                    neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
+                    shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
+                    upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
+                    lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
+                    overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null, // Durchschnitt als Zahl speichern
                     notes,
                 };
 
-                console.log('Gesammelte Daten:', data);
-                showPopup(data);
+                try {
+                    // Speichern der Daten in der Firestore-Collection 'dailyEntries'
+                    const docRef = await db.collection("dailyEntries").add(data);
+                    console.log("Dokument erfolgreich geschrieben mit ID: ", docRef.id);
+                    alert("Daten erfolgreich gespeichert!");
+                    showPopup(data); // Zeigt das Popup mit den gespeicherten Daten
+                    // Hier könntest du optional die Formularfelder zurücksetzen, z.B. so:
+                    // resetForm(); // Eine neue Funktion, die du implementieren müsstest
+                } catch (e) {
+                    console.error("Fehler beim Hinzufügen des Dokuments: ", e);
+                    alert("Fehler beim Speichern der Daten: " + e.message);
+                }
             });
 
             document.getElementById('closePopupBtn').addEventListener('click', closePopup);
