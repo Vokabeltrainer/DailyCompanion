@@ -142,12 +142,12 @@
         }
 
         /* Sport Checkboxen Styling & Schmerzmittel Checkboxen Styling (nutzen gleiche Klasse .sport-checkbox) */
-        .sport-options-group, .painmed-options-group, .stretching-options-group { /* NEU: .stretching-options-group hinzugefügt */
+        .sport-options-group, .painmed-options-group, .stretching-options-group {
             display: flex;
             flex-direction: row;
-            flex-wrap: wrap;
+            flex-wrap: wrap; /* Erlaube Umbruch, falls nicht alle in eine Reihe passen */
             justify-content: center;
-            gap: 15px;
+            gap: 8px; /* Reduzierter Abstand, um mehr in eine Reihe zu bekommen */
             margin-top: 15px;
         }
 
@@ -158,7 +158,7 @@
             justify-content: center;
             cursor: pointer;
             position: relative;
-            padding: 0 12px;
+            padding: 0 10px; /* Reduziertes Padding */
             background-color: #2a2a4a;
             border: 1px solid #45456a;
             border-radius: 10px;
@@ -166,10 +166,11 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
             color: #FFFFFF;
             font-weight: 500;
-            min-width: 80px;
+            min-width: 70px; /* Reduzierte Mindestbreite */
             height: 30px;
             text-align: center;
-            font-size: 0.85em;
+            font-size: 0.8em; /* Reduzierte Schriftgröße */
+            flex-shrink: 0; /* Verhindert das Schrumpfen bei kleinen Bildschirmen */
         }
 
         .sport-checkbox input[type="checkbox"] {
@@ -358,18 +359,18 @@
             }
 
             .sport-options-group, .painmed-options-group, .stretching-options-group {
-                gap: 10px;
+                gap: 5px; /* Noch kleinerer Abstand für sehr kleine Bildschirme */
             }
 
             .sport-checkbox {
-                padding: 0 10px;
-                font-size: 0.8em;
-                min-width: 70px;
-                height: 30px;
+                padding: 0 8px; /* Noch kleineres Padding */
+                font-size: 0.75em; /* Noch kleinere Schriftgröße */
+                min-width: 60px; /* Noch kleinere Mindestbreite */
+                height: 28px;
             }
 
             .sport-checkbox .icon {
-                font-size: 1em;
+                font-size: 0.9em;
             }
 
             .rating-scale {
@@ -529,6 +530,10 @@
                     <span class="icon">⚽</span>
                 </label>
                 <label class="sport-checkbox">
+                    <input type="checkbox" id="sportCycling" data-sport-type="active" data-sport-name="Radfahren">
+                    <span class="icon">🚴‍♂️</span>
+                </label>
+                <label class="sport-checkbox">
                     <input type="checkbox" id="sportNone" data-sport-type="none" data-sport-name="Kein Sport">
                     <span class="icon">❌</span>
                 </label>
@@ -539,11 +544,11 @@
             <label>Dehnübungen</label>
             <div class="stretching-options-group">
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Erledigt">
+                    <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Gemacht">
                     <span class="icon">✅</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="stretchingNotDone" data-stretching-type="none" data-stretching-name="Keine Dehnübungen">
+                    <input type="checkbox" id="stretchingNotDone" data-stretching-type="none" data-stretching-name="Nicht gemacht">
                     <span class="icon">❌</span>
                 </label>
             </div>
@@ -559,7 +564,7 @@
                     <span class="icon">Diclo 💊</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="painmedNone" data-painmed-type="none" data-painmed-name="Keine Schmerzmittel">
+                    <input type="checkbox" id="painmedNone" data-painmed-type="none" data-painmed-name="Keine">
                     <span class="icon">❌</span>
                 </label>
             </div>
@@ -742,21 +747,22 @@
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
 
-            // Event-Listener für Sport-Checkboxen
-            const sportCheckboxes = document.querySelectorAll('.sport-options-group .sport-checkbox input[type="checkbox"]'); // Genauerer Selektor
+            // Event-Listener für Sport-Checkboxen (Mehrfachauswahl, "Kein Sport" ist exklusiv)
+            const sportCheckboxes = document.querySelectorAll('.sport-options-group input[type="checkbox"]');
             sportCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
                     const label = event.target.closest('.sport-checkbox');
                     if (event.target.checked) {
                         label.classList.add('selected');
+                        // Wenn "Kein Sport" gewählt wird, alle anderen abwählen
                         if (event.target.id === 'sportNone') {
                             sportCheckboxes.forEach(cb => {
-                                if (cb !== event.target && cb.dataset.sportType === 'active') {
+                                if (cb !== event.target) {
                                     cb.checked = false;
                                     cb.closest('.sport-checkbox').classList.remove('selected');
                                 }
                             });
-                        } else if (event.target.dataset.sportType === 'active') {
+                        } else { // Wenn ein spezifischer Sport gewählt wird, "Kein Sport" abwählen
                             const sportNoneCheckbox = document.getElementById('sportNone');
                             if (sportNoneCheckbox && sportNoneCheckbox.checked) {
                                 sportNoneCheckbox.checked = false;
@@ -765,11 +771,15 @@
                         }
                     } else {
                         label.classList.remove('selected');
+                        // Wenn alle spezifischen Sportarten abgewählt sind, und "Kein Sport" nicht ausgewählt ist,
+                        // dann *sollte* man eigentlich nichts tun, da es um Mehrfachauswahl geht.
+                        // Die Validierung beim Speichern wird prüfen, ob überhaupt etwas ausgewählt ist.
                     }
                 });
             });
 
-            // NEU: Event-Listener für Dehnübungen-Checkboxen
+
+            // Event-Listener für Dehnübungen-Checkboxen (Exklusiv-Auswahl)
             const stretchingCheckboxes = document.querySelectorAll('.stretching-options-group .sport-checkbox input[type="checkbox"]');
             stretchingCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
@@ -790,21 +800,21 @@
             });
 
 
-            // NEU: Event-Listener für Schmerzmittel-Checkboxen
-            const painmedCheckboxes = document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]'); // Genauerer Selektor
+            // Event-Listener für Schmerzmittel-Checkboxen (Exklusiv-Auswahl bei "Keine")
+            const painmedCheckboxes = document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]');
             painmedCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
                     const label = event.target.closest('.sport-checkbox');
                     if (event.target.checked) {
                         label.classList.add('selected');
-                        if (event.target.id === 'painmedNone') { // ID "painmedNone" muss im HTML so existieren
+                        if (event.target.id === 'painmedNone') {
                             painmedCheckboxes.forEach(cb => {
-                                if (cb !== event.target && cb.dataset.painmedType === 'active') { // data-painmed-type Attribut
+                                if (cb !== event.target && cb.dataset.painmedType === 'active') {
                                     cb.checked = false;
                                     cb.closest('.sport-checkbox').classList.remove('selected');
                                 }
                             });
-                        } else if (event.target.dataset.painmedType === 'active') { // data-painmed-type Attribut
+                        } else if (event.target.dataset.painmedType === 'active') {
                             const painmedNoneCheckbox = document.getElementById('painmedNone');
                             if (painmedNoneCheckbox && painmedNoneCheckbox.checked) {
                                 painmedNoneCheckbox.checked = false;
@@ -824,39 +834,45 @@
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
-                const selectedSports = Array.from(document.querySelectorAll('.sport-options-group .sport-checkbox input[type="checkbox"]:checked'))
-                                         .map(cb => cb.dataset.sportName);
+                // Erfassung der ausgewählten Sportarten (Mehrfachauswahl, "Kein Sport" ist exklusiv)
+                let selectedSports = [];
+                const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
+                const noSport = document.getElementById('sportNone');
 
-                // NEU: Dehnübungen Status erfassen
+                if (noSport.checked) {
+                    selectedSports.push(noSport.dataset.sportName);
+                } else if (activeSports.length > 0) {
+                    selectedSports = activeSports.map(cb => cb.dataset.sportName);
+                }
+
+
                 const selectedStretching = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const stretchingStatus = selectedStretching ? selectedStretching.dataset.stretchingName : null;
 
 
-                // NEU: Ausgewählte Schmerzmittel sammeln
                 const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
-                                          .map(cb => cb.dataset.painmedName); // data-painmed-name Attribut
+                                          .map(cb => cb.dataset.painmedName);
 
                 const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
                 const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
                 const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
-                // KORREKTUR: lowerBodyPainRating Selektor korrigiert
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
 
 
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
-                const notes = document.getElementById('notes').value; // NEU: Anmerkungen erfassen
+                const notes = document.getElementById('notes').value;
 
                 let missingFields = [];
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
-                if (selectedSports.length === 0) missingFields.push('Sportart');
-                if (!stretchingStatus) missingFields.push('Dehnübungen'); // NEU: Validierung Dehnübungen
+                if (selectedSports.length === 0) missingFields.push('Sportart'); // Validierung Sport
+                if (!stretchingStatus) missingFields.push('Dehnübungen');
                 if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel');
                 if (!moodRating) missingFields.push('Stimmung');
                 if (!neckPainRating) missingFields.push('Schmerzen Nacken');
                 if (!shoulderPainRating) missingFields.push('Schmerzen Schultern');
                 if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
-                if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper'); // Sollte jetzt korrekt validiert werden
+                if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus, bevor Sie speichern:\n\n- ${missingFields.join('\n- ')}`);
@@ -868,7 +884,7 @@
                     bedTime,
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
                     selectedSports,
-                    stretchingStatus, // NEU
+                    stretchingStatus,
                     selectedPainmeds,
                     moodRating,
                     neckPainRating,
@@ -876,7 +892,7 @@
                     upperBodyPainRating,
                     lowerBodyPainRating,
                     overallAverage: overallAverage !== '--' ? overallAverage : null,
-                    notes, // NEU: Anmerkungen zu den Daten hinzufügen
+                    notes,
                 };
 
                 console.log('Gesammelte Daten:', data);
