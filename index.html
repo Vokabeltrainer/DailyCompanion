@@ -142,7 +142,7 @@
         }
 
         /* Sport Checkboxen Styling & Schmerzmittel Checkboxen Styling (nutzen gleiche Klasse .sport-checkbox) */
-        .sport-options-group, .painmed-options-group { /* NEU: .painmed-options-group hinzugefügt */
+        .sport-options-group, .painmed-options-group, .stretching-options-group { /* NEU: .stretching-options-group hinzugefügt */
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
@@ -151,7 +151,7 @@
             margin-top: 15px;
         }
 
-        .sport-checkbox { /* Diese Klasse wird auch für Schmerzmittel verwendet */
+        .sport-checkbox { /* Diese Klasse wird auch für Schmerzmittel und Dehnübungen verwendet */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -271,6 +271,21 @@
             text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
+        /* Styling für die Textarea */
+        textarea {
+            width: calc(100% - 20px); /* 100% Breite minus Padding */
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: 1px solid #45456a;
+            background-color: #2a2a4a;
+            color: #FFFFFF;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1em;
+            resize: vertical; /* Nur vertikale Größenänderung zulassen */
+            min-height: 80px; /* Mindesthöhe für die Textarea */
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+        }
 
         .submit-button {
             display: block;
@@ -342,7 +357,7 @@
                 font-size: 1.1em;
             }
 
-            .sport-options-group, .painmed-options-group {
+            .sport-options-group, .painmed-options-group, .stretching-options-group {
                 gap: 10px;
             }
 
@@ -370,6 +385,12 @@
 
             .overall-average-display {
                 font-size: 1.8em;
+            }
+
+            textarea {
+                width: calc(100% - 20px);
+                font-size: 0.9em;
+                min-height: 60px;
             }
 
             .submit-button {
@@ -515,6 +536,19 @@
         </div>
 
         <div class="category-item">
+            <label>Dehnübungen</label>
+            <div class="stretching-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="stretchingDone" data-stretching-type="done" data-stretching-name="Erledigt">
+                    <span class="icon">✅</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="stretchingNotDone" data-stretching-type="none" data-stretching-name="Keine Dehnübungen">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+        <div class="category-item">
             <label>Schmerzmittel</label>
             <div class="painmed-options-group">
                 <label class="sport-checkbox"> <input type="checkbox" id="painmedIbu" data-painmed-type="active" data-painmed-name="IBU">
@@ -525,7 +559,7 @@
                     <span class="icon">Diclo 💊</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="painmedNone" data-painmed-type="none" data-painmed-name="Keine">
+                    <input type="checkbox" id="painmedNone" data-painmed-type="none" data-painmed-name="Keine Schmerzmittel">
                     <span class="icon">❌</span>
                 </label>
             </div>
@@ -562,6 +596,10 @@
             <div class="overall-average-display" id="overallAverageDisplay">--</div>
         </div>
 
+        <div class="category-item">
+            <label for="notes">Anmerkungen</label>
+            <textarea id="notes" placeholder="Hier können Sie zusätzliche Kommentare eingeben..."></textarea>
+        </div>
         <button class="submit-button" id="submitBtn">Speichern</button>
     </div>
 
@@ -666,7 +704,10 @@
             const sportsText = data.selectedSports && data.selectedSports.length > 0 ? data.selectedSports.join(', ') : 'Keine Auswahl';
             popupContentHtml += `<p><strong>Sport:</strong> ${sportsText}</p>`;
 
-            // NEU: Anzeige für Schmerzmittel
+            // NEU: Anzeige für Dehnübungen
+            popupContentHtml += `<p><strong>Dehnübungen:</strong> ${data.stretchingStatus || 'Nicht angegeben'}</p>`;
+
+
             const painmedsText = data.selectedPainmeds && data.selectedPainmeds.length > 0 ? data.selectedPainmeds.join(', ') : 'Keine Auswahl';
             popupContentHtml += `<p><strong>Schmerzmittel:</strong> ${painmedsText}</p>`;
 
@@ -678,6 +719,8 @@
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
+            // NEU: Anzeige für Anmerkungen
+            popupContentHtml += `<p><strong>Anmerkungen:</strong> ${data.notes || 'Keine Anmerkungen'}</p>`;
 
 
             popupContent.innerHTML = popupContentHtml;
@@ -726,6 +769,27 @@
                 });
             });
 
+            // NEU: Event-Listener für Dehnübungen-Checkboxen
+            const stretchingCheckboxes = document.querySelectorAll('.stretching-options-group .sport-checkbox input[type="checkbox"]');
+            stretchingCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    const label = event.target.closest('.sport-checkbox');
+                    if (event.target.checked) {
+                        label.classList.add('selected');
+                        // Sicherstellen, dass nur eine Option ausgewählt werden kann
+                        stretchingCheckboxes.forEach(cb => {
+                            if (cb !== event.target) {
+                                cb.checked = false;
+                                cb.closest('.sport-checkbox').classList.remove('selected');
+                            }
+                        });
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                });
+            });
+
+
             // NEU: Event-Listener für Schmerzmittel-Checkboxen
             const painmedCheckboxes = document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]'); // Genauerer Selektor
             painmedCheckboxes.forEach(checkbox => {
@@ -763,27 +827,36 @@
                 const selectedSports = Array.from(document.querySelectorAll('.sport-options-group .sport-checkbox input[type="checkbox"]:checked'))
                                          .map(cb => cb.dataset.sportName);
 
+                // NEU: Dehnübungen Status erfassen
+                const selectedStretching = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked');
+                const stretchingStatus = selectedStretching ? selectedStretching.dataset.stretchingName : null;
+
+
                 // NEU: Ausgewählte Schmerzmittel sammeln
                 const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
                                           .map(cb => cb.dataset.painmedName); // data-painmed-name Attribut
 
                 const moodRating = document.querySelector('#mood-rating .rating-box.selected')?.dataset.value || null;
                 const neckPainRating = document.querySelector('#neck-pain-rating .rating-box.selected')?.dataset.value || null;
-                const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null; // NEU
+                const shoulderPainRating = document.querySelector('#shoulder-pain-rating .rating-box.selected')?.dataset.value || null;
+                // KORREKTUR: lowerBodyPainRating Selektor korrigiert
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
 
+
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
+                const notes = document.getElementById('notes').value; // NEU: Anmerkungen erfassen
 
                 let missingFields = [];
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
-                if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel'); // NEU: Validierung für Schmerzmittel
+                if (!stretchingStatus) missingFields.push('Dehnübungen'); // NEU: Validierung Dehnübungen
+                if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel');
                 if (!moodRating) missingFields.push('Stimmung');
                 if (!neckPainRating) missingFields.push('Schmerzen Nacken');
-                if (!shoulderPainRating) missingFields.push('Schmerzen Schultern'); // NEU: Validierung Schulter
+                if (!shoulderPainRating) missingFields.push('Schmerzen Schultern');
                 if (!upperBodyPainRating) missingFields.push('Schmerzen Oberkörper');
-                if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper');
+                if (!lowerBodyPainRating) missingFields.push('Schmerzen Unterkörper'); // Sollte jetzt korrekt validiert werden
 
                 if (missingFields.length > 0) {
                     alert(`Bitte füllen Sie die folgenden Kategorien aus, bevor Sie speichern:\n\n- ${missingFields.join('\n- ')}`);
@@ -795,13 +868,15 @@
                     bedTime,
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
                     selectedSports,
-                    selectedPainmeds, // NEU
+                    stretchingStatus, // NEU
+                    selectedPainmeds,
                     moodRating,
                     neckPainRating,
-                    shoulderPainRating, // NEU
+                    shoulderPainRating,
                     upperBodyPainRating,
                     lowerBodyPainRating,
                     overallAverage: overallAverage !== '--' ? overallAverage : null,
+                    notes, // NEU: Anmerkungen zu den Daten hinzufügen
                 };
 
                 console.log('Gesammelte Daten:', data);
