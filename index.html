@@ -141,7 +141,7 @@
         }
 
         /* Sport Checkboxen Styling & Schmerzmittel Checkboxen Styling (nutzen gleiche Klasse .sport-checkbox) */
-        .sport-options-group, .painmed-options-group, .stretching-options-group {
+        .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap; /* Erlaube Umbruch, falls nicht alle in eine Reihe passen */
@@ -358,7 +358,7 @@
                 font-size: 1.1em;
             }
 
-            .sport-options-group, .painmed-options-group, .stretching-options-group {
+            .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group {
                 gap: 5px; /* Noch kleinerer Abstand für sehr kleine Bildschirme */
             }
 
@@ -553,6 +553,35 @@
                 </label>
             </div>
         </div>
+
+        <div class="category-item">
+            <label>Gluten</label>
+            <div class="gluten-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="glutenYes" data-gluten-type="yes" data-gluten-name="Ja">
+                    <span class="icon">✅</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="glutenNo" data-gluten-type="no" data-gluten-name="Nein">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="category-item">
+            <label>Milch</label>
+            <div class="milk-options-group">
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="milkYes" data-milk-type="yes" data-milk-name="Ja">
+                    <span class="icon">✅</span>
+                </label>
+                <label class="sport-checkbox">
+                    <input type="checkbox" id="milkNo" data-milk-type="no" data-milk-name="Nein">
+                    <span class="icon">❌</span>
+                </label>
+            </div>
+        </div>
+
         <div class="category-item">
             <label>Schmerzmittel</label>
             <div class="painmed-options-group">
@@ -629,7 +658,7 @@
             projectId: "daily-companion-24975", // ERSETZE DIES
             storageBucket: "daily-companion-24975.firebasestorage.app", // ERSETZE DIES
             messagingSenderId: "330854991329", // ERSETZE DIES
-            appId: "1:330854991329:web:2d8a4060f8bd50372d3ea0", // ERSETZE DIES
+            appId: "1:330854991329:web:2d8a4060f8bd50372d3ea0", // ERSETZE DIES (optional, wenn du Analytics hast)
             measurementId: "G-52MKKC9GCS" // ERSETZE DIES (optional, wenn du Analytics hast)
         };
 
@@ -728,8 +757,12 @@
             const sportsText = data.selectedSports && data.selectedSports.length > 0 ? data.selectedSports.join(', ') : 'Keine Auswahl';
             popupContentHtml += `<p><strong>Sport:</strong> ${sportsText}</p>`;
 
-            // NEU: Anzeige für Dehnübungen
             popupContentHtml += `<p><strong>Dehnübungen:</strong> ${data.stretchingStatus || 'Nicht angegeben'}</p>`;
+
+            // NEW: Display for Gluten
+            popupContentHtml += `<p><strong>Gluten:</strong> ${data.glutenStatus || 'Nicht angegeben'}</p>`;
+            // NEW: Display for Milk
+            popupContentHtml += `<p><strong>Milch:</strong> ${data.milkStatus || 'Nicht angegeben'}</p>`;
 
 
             const painmedsText = data.selectedPainmeds && data.selectedPainmeds.length > 0 ? data.selectedPainmeds.join(', ') : 'Keine Auswahl';
@@ -737,13 +770,12 @@
 
             popupContentHtml += `<p><strong>Stimmung:</strong> ${data.moodRating ? data.moodRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Nackenschmerzen:</strong> ${data.neckPainRating ? data.neckPainRating + '/10' : 'Nicht bewertet'}</p>`;
-            popupContentHtml += `<p><strong>Schulterschmerzen:</strong> ${data.shoulderPainRating ? data.shoulderPainRating + '/10' : 'Nicht bewertet'}</p>`; // NEU: Schulterschmerzen
+            popupContentHtml += `<p><strong>Schulterschmerzen:</strong> ${data.shoulderPainRating ? data.shoulderPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Oberkörperschmerzen:</strong> ${data.upperBodyPainRating ? data.upperBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += `<p><strong>Unterkörperschmerzen:</strong> ${data.lowerBodyPainRating ? data.lowerBodyPainRating + '/10' : 'Nicht bewertet'}</p>`;
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
-            // NEU: Anzeige für Anmerkungen
             popupContentHtml += `<p><strong>Anmerkungen:</strong> ${data.notes || 'Keine Anmerkungen'}</p>`;
 
 
@@ -759,7 +791,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             generateRatingBoxes('mood-rating');
             generateRatingBoxes('neck-pain-rating');
-            generateRatingBoxes('shoulder-pain-rating'); // NEU: Für Schulterschmerzen hinzugefügt
+            generateRatingBoxes('shoulder-pain-rating');
             generateRatingBoxes('upper-body-pain-rating');
             generateRatingBoxes('lower-body-pain-rating');
 
@@ -790,9 +822,6 @@
                         }
                     } else {
                         label.classList.remove('selected');
-                        // Wenn alle spezifischen Sportarten abgewählt sind, und "Kein Sport" nicht ausgewählt ist,
-                        // dann *sollte* man eigentlich nichts tun, da es um Mehrfachauswahl geht.
-                        // Die Validierung beim Speichern wird prüfen, ob überhaupt etwas ausgewählt ist.
                     }
                 });
             });
@@ -805,8 +834,45 @@
                     const label = event.target.closest('.sport-checkbox');
                     if (event.target.checked) {
                         label.classList.add('selected');
-                        // Sicherstellen, dass nur eine Option ausgewählt werden kann
                         stretchingCheckboxes.forEach(cb => {
+                            if (cb !== event.target) {
+                                cb.checked = false;
+                                cb.closest('.sport-checkbox').classList.remove('selected');
+                            }
+                        });
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                });
+            });
+
+            // NEW: Event-Listener for Gluten Checkboxes (Exclusive selection)
+            const glutenCheckboxes = document.querySelectorAll('.gluten-options-group .sport-checkbox input[type="checkbox"]');
+            glutenCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    const label = event.target.closest('.sport-checkbox');
+                    if (event.target.checked) {
+                        label.classList.add('selected');
+                        glutenCheckboxes.forEach(cb => {
+                            if (cb !== event.target) {
+                                cb.checked = false;
+                                cb.closest('.sport-checkbox').classList.remove('selected');
+                            }
+                        });
+                    } else {
+                        label.classList.remove('selected');
+                    }
+                });
+            });
+
+            // NEW: Event-Listener for Milk Checkboxes (Exclusive selection)
+            const milkCheckboxes = document.querySelectorAll('.milk-options-group .sport-checkbox input[type="checkbox"]');
+            milkCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    const label = event.target.closest('.sport-checkbox');
+                    if (event.target.checked) {
+                        label.classList.add('selected');
+                        milkCheckboxes.forEach(cb => {
                             if (cb !== event.target) {
                                 cb.checked = false;
                                 cb.closest('.sport-checkbox').classList.remove('selected');
@@ -849,11 +915,10 @@
 
             calculateOverallAverage();
 
-            document.getElementById('submitBtn').addEventListener('click', async () => { // "async" hinzugefügt
+            document.getElementById('submitBtn').addEventListener('click', async () => {
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
-                // Erfassung der ausgewählten Sportarten (Mehrfachauswahl, "Kein Sport" ist exklusiv)
                 let selectedSports = [];
                 const activeSports = Array.from(document.querySelectorAll('.sport-options-group input[type="checkbox"][data-sport-type="active"]:checked'));
                 const noSport = document.getElementById('sportNone');
@@ -867,6 +932,14 @@
 
                 const selectedStretching = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const stretchingStatus = selectedStretching ? selectedStretching.dataset.stretchingName : null;
+
+                // NEW: Get selected Gluten status
+                const selectedGluten = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked');
+                const glutenStatus = selectedGluten ? selectedGluten.dataset.glutenName : null;
+
+                // NEW: Get selected Milk status
+                const selectedMilk = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked');
+                const milkStatus = selectedMilk ? selectedMilk.dataset.milkName : null;
 
 
                 const selectedPainmeds = Array.from(document.querySelectorAll('.painmed-options-group .sport-checkbox input[type="checkbox"]:checked'))
@@ -884,8 +957,10 @@
 
                 let missingFields = [];
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
-                if (selectedSports.length === 0) missingFields.push('Sportart'); // Validierung Sport
+                if (selectedSports.length === 0) missingFields.push('Sportart');
                 if (!stretchingStatus) missingFields.push('Dehnübungen');
+                if (!glutenStatus) missingFields.push('Gluten'); // NEW: Validation for Gluten
+                if (!milkStatus) missingFields.push('Milch');     // NEW: Validation for Milk
                 if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel');
                 if (!moodRating) missingFields.push('Stimmung');
                 if (!neckPainRating) missingFields.push('Schmerzen Nacken');
@@ -899,30 +974,29 @@
                 }
 
                 const data = {
-                    date: firebase.firestore.FieldValue.serverTimestamp(), // Speichert den Server-Zeitstempel
+                    date: firebase.firestore.FieldValue.serverTimestamp(),
                     wakeUpTime,
                     bedTime,
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
                     selectedSports,
                     stretchingStatus,
+                    glutenStatus, // NEW: Add Gluten status to data
+                    milkStatus,     // NEW: Add Milk status to data
                     selectedPainmeds,
-                    moodRating: moodRating ? parseInt(moodRating) : null, // Ratings als Zahlen speichern
+                    moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
                     shoulderPainRating: shoulderPainRating ? parseInt(shoulderPainRating) : null,
                     upperBodyPainRating: upperBodyPainRating ? parseInt(upperBodyPainRating) : null,
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
-                    overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null, // Durchschnitt als Zahl speichern
+                    overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes,
                 };
 
                 try {
-                    // Speichern der Daten in der Firestore-Collection 'dailyEntries'
                     const docRef = await db.collection("dailyEntries").add(data);
                     console.log("Dokument erfolgreich geschrieben mit ID: ", docRef.id);
                     alert("Daten erfolgreich gespeichert!");
-                    showPopup(data); // Zeigt das Popup mit den gespeicherten Daten
-                    // Hier könntest du optional die Formularfelder zurücksetzen, z.B. so:
-                    // resetForm(); // Eine neue Funktion, die du implementieren müsstest
+                    showPopup(data);
                 } catch (e) {
                     console.error("Fehler beim Hinzufügen des Dokuments: ", e);
                     alert("Fehler beim Speichern der Daten: " + e.message);
