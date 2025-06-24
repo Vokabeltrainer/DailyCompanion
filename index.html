@@ -141,7 +141,7 @@
         }
 
         /* Sport Checkboxen Styling & Schmerzmittel Checkboxen Styling (nutzen gleiche Klasse .sport-checkbox) */
-        .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group {
+        .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group, .notes-tags-group {
             display: flex;
             flex-direction: row;
             flex-wrap: wrap; /* Erlaube Umbruch, falls nicht alle in eine Reihe passen */
@@ -150,7 +150,7 @@
             margin-top: 15px;
         }
 
-        .sport-checkbox { /* Diese Klasse wird auch für Schmerzmittel und Dehnübungen verwendet */
+        .sport-checkbox, .notes-tag-button {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -170,6 +170,24 @@
             text-align: center;
             font-size: 0.8em; /* Reduzierte Schriftgröße */
             flex-shrink: 0; /* Verhindert das Schrumpfen bei kleinen Bildschirmen */
+        }
+
+        /* NEU: Styling für Notiz-Tags */
+        .notes-tag-button {
+            border-radius: 50px; /* Macht die Buttons rund */
+            min-width: 50px; /* Angepasste Mindestbreite für runde Buttons */
+            height: 50px; /* Angepasste Höhe für runde Buttons */
+            font-size: 0.9em;
+            padding: 0 15px; /* Angepasstes Padding */
+            background-color: #3a3a5a; /* Etwas dunklerer Hintergrund für Tags */
+            border: 2px solid #5a5a7a;
+        }
+
+        .notes-tag-button.selected {
+            background-color: #00f2fe; /* Highlight Farbe für ausgewählte Tags */
+            border-color: #4facfe;
+            color: #0a0a1a; /* Dunklere Schriftfarbe für bessere Lesbarkeit */
+            box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.7), 0 4px 10px rgba(0, 0, 0, 0.5);
         }
 
         .sport-checkbox input[type="checkbox"] {
@@ -197,7 +215,7 @@
         }
 
 
-        .sport-checkbox:hover {
+        .sport-checkbox:hover, .notes-tag-button:hover {
             background-color: #3a3a5a;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
         }
@@ -358,7 +376,7 @@
                 font-size: 1.1em;
             }
 
-            .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group {
+            .sport-options-group, .painmed-options-group, .stretching-options-group, .gluten-options-group, .milk-options-group, .notes-tags-group {
                 gap: 5px; /* Noch kleinerer Abstand für sehr kleine Bildschirme */
             }
 
@@ -367,6 +385,12 @@
                 font-size: 0.75em; /* Noch kleinere Schriftgröße */
                 min-width: 60px; /* Noch kleinere Mindestbreite */
                 height: 28px;
+            }
+
+            /* NEU: Responsive für Notiz-Tags */
+            .notes-tag-button {
+                min-width: 40px;
+                height: 40px;
             }
 
             .sport-checkbox .icon {
@@ -589,7 +613,7 @@
                     <span class="icon">IBU 💊</span>
                 </label>
                 <label class="sport-checkbox">
-                    <input type="checkbox" id="painmedDiclo" data-painmed-type="active" data-painmed-name="Diclo">
+                    <input type="checkbox" id="painmedDiclo" data-painbox-type="active" data-painmed-name="Diclo">
                     <span class="icon">Diclo 💊</span>
                 </label>
                 <label class="sport-checkbox">
@@ -632,6 +656,15 @@
 
         <div class="category-item">
             <label for="notes">Anmerkungen</label>
+            <div class="notes-tags-group">
+                <button type="button" class="notes-tag-button" data-tag="Kuchen">Kuchen</button>
+                <button type="button" class="notes-tag-button" data-tag="Schokolade">Schokolade</button>
+                <button type="button" class="notes-tag-button" data-tag="Bosch-Kantine">Bosch-Kantine</button>
+                <button type="button" class="notes-tag-button" data-tag="Nackensperre">Nackensperre</button>
+                <button type="button" class="notes-tag-button" data-tag="Erreger">Erreger</button>
+                <button type="button" class="notes-tag-button" data-tag="Allergie">Allergie</button>
+                <button type="button" class="notes-tag-button" data-tag="Beinsperre">Beinsperre</button>
+            </div>
             <textarea id="notes" placeholder="Hier können Sie zusätzliche Kommentare eingeben..."></textarea>
         </div>
         <button class="submit-button" id="submitBtn">Speichern</button>
@@ -759,9 +792,9 @@
 
             popupContentHtml += `<p><strong>Dehnübungen:</strong> ${data.stretchingStatus || 'Nicht angegeben'}</p>`;
 
-            // NEW: Display for Gluten
+            // Display for Gluten
             popupContentHtml += `<p><strong>Gluten:</strong> ${data.glutenStatus || 'Nicht angegeben'}</p>`;
-            // NEW: Display for Milk
+            // Display for Milk
             popupContentHtml += `<p><strong>Milch:</strong> ${data.milkStatus || 'Nicht angegeben'}</p>`;
 
 
@@ -776,6 +809,11 @@
             popupContentHtml += '<hr>';
 
             popupContentHtml += `<p><strong>Gesamttagesbilanz:</strong> ${data.overallAverage && data.overallAverage !== '--' ? data.overallAverage : 'Nicht berechnet'}</p>`;
+            
+            // NEU: Anzeige für Notiz-Tags
+            const selectedNotesTagsText = data.selectedNotesTags && data.selectedNotesTags.length > 0 ? data.selectedNotesTags.join(', ') : 'Keine';
+            popupContentHtml += `<p><strong>Anmerkungs-Tags:</strong> ${selectedNotesTagsText}</p>`;
+
             popupContentHtml += `<p><strong>Anmerkungen:</strong> ${data.notes || 'Keine Anmerkungen'}</p>`;
 
 
@@ -846,7 +884,7 @@
                 });
             });
 
-            // NEW: Event-Listener for Gluten Checkboxes (Exclusive selection)
+            // Event-Listener for Gluten Checkboxes (Exclusive selection)
             const glutenCheckboxes = document.querySelectorAll('.gluten-options-group .sport-checkbox input[type="checkbox"]');
             glutenCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
@@ -865,7 +903,7 @@
                 });
             });
 
-            // NEW: Event-Listener for Milk Checkboxes (Exclusive selection)
+            // Event-Listener for Milk Checkboxes (Exclusive selection)
             const milkCheckboxes = document.querySelectorAll('.milk-options-group .sport-checkbox input[type="checkbox"]');
             milkCheckboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', (event) => {
@@ -912,6 +950,14 @@
                 });
             });
 
+            // NEU: Event-Listener für Notes-Tags
+            const notesTagButtons = document.querySelectorAll('.notes-tag-button');
+            notesTagButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    button.classList.toggle('selected');
+                });
+            });
+
 
             calculateOverallAverage();
 
@@ -933,11 +979,11 @@
                 const selectedStretching = document.querySelector('.stretching-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const stretchingStatus = selectedStretching ? selectedStretching.dataset.stretchingName : null;
 
-                // NEW: Get selected Gluten status
+                // Get selected Gluten status
                 const selectedGluten = document.querySelector('.gluten-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const glutenStatus = selectedGluten ? selectedGluten.dataset.glutenName : null;
 
-                // NEW: Get selected Milk status
+                // Get selected Milk status
                 const selectedMilk = document.querySelector('.milk-options-group .sport-checkbox input[type="checkbox"]:checked');
                 const milkStatus = selectedMilk ? selectedMilk.dataset.milkName : null;
 
@@ -951,6 +997,10 @@
                 const upperBodyPainRating = document.querySelector('#upper-body-pain-rating .rating-box.selected')?.dataset.value || null;
                 const lowerBodyPainRating = document.querySelector('#lower-body-pain-rating .rating-box.selected')?.dataset.value || null;
 
+                // NEU: Ausgewählte Notiz-Tags erfassen
+                const selectedNotesTags = Array.from(document.querySelectorAll('.notes-tag-button.selected'))
+                    .map(button => button.dataset.tag);
+
 
                 const overallAverage = document.getElementById('overallAverageDisplay').textContent;
                 const notes = document.getElementById('notes').value;
@@ -959,8 +1009,8 @@
                 if (!wakeUpTime || !bedTime) missingFields.push('Aufsteh- und Schlafzeiten');
                 if (selectedSports.length === 0) missingFields.push('Sportart');
                 if (!stretchingStatus) missingFields.push('Dehnübungen');
-                if (!glutenStatus) missingFields.push('Gluten'); // NEW: Validation for Gluten
-                if (!milkStatus) missingFields.push('Milch');     // NEW: Validation for Milk
+                if (!glutenStatus) missingFields.push('Gluten');
+                if (!milkStatus) missingFields.push('Milch');
                 if (selectedPainmeds.length === 0) missingFields.push('Schmerzmittel');
                 if (!moodRating) missingFields.push('Stimmung');
                 if (!neckPainRating) missingFields.push('Schmerzen Nacken');
@@ -980,8 +1030,8 @@
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
                     selectedSports,
                     stretchingStatus,
-                    glutenStatus, // NEW: Add Gluten status to data
-                    milkStatus,     // NEW: Add Milk status to data
+                    glutenStatus,
+                    milkStatus,
                     selectedPainmeds,
                     moodRating: moodRating ? parseInt(moodRating) : null,
                     neckPainRating: neckPainRating ? parseInt(neckPainRating) : null,
@@ -990,6 +1040,7 @@
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes,
+                    selectedNotesTags // NEU: Ausgewählte Tags zur Datenbank hinzufügen
                 };
 
                 try {
