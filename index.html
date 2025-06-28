@@ -1113,7 +1113,7 @@
                             const user = result.user;
                             console.log('Angemeldet als:', user.displayName, 'UID:', user.uid);
                             alert(`Erfolgreich angemeldet als ${user.displayName}! Deine UID ist: ${user.uid}`);
-                            userInfoDiv.textContent = `Angemeldet als: ${user.displayName} (UID: ${user.uid})`;
+                            userInfoDiv.textContent = `Angemeldet als: ${user.displayName}`;
                             signInButton.style.display = 'none';
                         }).catch((error) => {
                             console.error('Fehler bei der Google-Anmeldung:', error);
