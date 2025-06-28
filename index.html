@@ -1126,7 +1126,7 @@
             auth.onAuthStateChanged((user) => {
                 if (user) {
                     console.log('Benutzer ist bereits angemeldet:', user.displayName, 'UID:', user.uid);
-                    userInfoDiv.textContent = `Angemeldet als: ${user.displayName} (UID: ${user.uid})`;
+                    userInfoDiv.textContent = `Angemeldet als: ${user.displayName}`;
                     if (signInButton) signInButton.style.display = 'none';
                 } else {
                     console.log('Kein Benutzer angemeldet.');
