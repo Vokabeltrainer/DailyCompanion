@@ -526,6 +526,25 @@
         <h1>Daily Companion</h1>
     </div>
 
+    <button id="signInButton" style="
+        margin: 20px auto 10px auto; /* Zentriert den Button und gibt Abstand */
+        padding: 12px 25px;
+        font-size: 1.2em;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(45deg, #007bff 0%, #00c7ff 100%); /* Blauer Farbverlauf */
+        border: none;
+        border-radius: 30px;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+        display: block; /* Stellt sicher, dass der Margin:auto funktioniert */
+    ">Mit Google anmelden</button>
+    <div id="userInfo" style="
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 0.9em;
+        color: #aaa;
+    ">Nicht angemeldet.</div>
     <div class="container">
         <div class="category-item">
             <label>Schlafzeiten</label>
@@ -646,8 +665,7 @@
 
         <div class="category-item">
             <label for="lower-body-pain-rating">Schmerzen Unterkörper</label>
-            <div class="rating-scale" id="lower-body-pain-rating"></div>
-        </div>
+            <div class="rating-scale" id="lower-body-pain-rating"></div> </div>
 
         <div class="category-item">
             <label>Gesamttagesbilanz</label>
@@ -684,6 +702,7 @@
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 
     <script>
@@ -702,11 +721,12 @@
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
         // Funktion zum Generieren der Rating-Felder (1-10)
         function generateRatingBoxes(containerId) {
             const container = document.getElementById(containerId);
-            if (!container) return;
+            if (!container) return; // Wichtig: Beende die Funktion, wenn der Container nicht gefunden wird
 
             for (let i = 1; i <= 10; i++) {
                 const box = document.createElement('div');
@@ -760,7 +780,7 @@
 
         // Funktion zur Berechnung des Gesamtdurchschnitts
         function calculateOverallAverage() {
-            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating'];
+            const ratingCategories = ['mood-rating', 'neck-pain-rating', 'shoulder-pain-rating', 'upper-body-pain-rating', 'lower-body-pain-rating']; // KORREKTUR: lower-body-pain-rating hinzugefügt
             let totalRating = 0;
             let ratingCount = 0;
 
@@ -835,7 +855,8 @@
             generateRatingBoxes('neck-pain-rating');
             generateRatingBoxes('shoulder-pain-rating');
             generateRatingBoxes('upper-body-pain-rating');
-            generateRatingBoxes('lower-body-pain-rating');
+            generateRatingBoxes('lower-body-pain-rating'); // KORREKTUR: ID hier korrigiert
+
 
             document.getElementById('wakeUpTime').addEventListener('change', calculateSleepDuration);
             document.getElementById('bedTime').addEventListener('change', calculateSleepDuration);
@@ -966,6 +987,20 @@
             calculateOverallAverage();
 
             document.getElementById('submitBtn').addEventListener('click', async () => {
+                const user = auth.currentUser;
+                if (!user) {
+                    alert('Bitte melden Sie sich zuerst an, um Daten zu speichern.');
+                    return;
+                }
+
+                // DEINE UID HIER EINFÜGEN
+                const YOUR_UID = "VgrOSS05xEPvvFUXQdybgQTCbX52";
+                if (user.uid !== YOUR_UID) {
+                    alert('Sie sind nicht berechtigt, Daten zu speichern. Bitte verwenden Sie das korrekte Konto.');
+                    return;
+                }
+
+
                 const wakeUpTime = document.getElementById('wakeUpTime').value;
                 const bedTime = document.getElementById('bedTime').value;
 
@@ -1029,6 +1064,7 @@
 
                 const data = {
                     date: firebase.firestore.FieldValue.serverTimestamp(),
+                    userId: user.uid,
                     wakeUpTime,
                     bedTime,
                     sleepDuration: document.getElementById('sleepDurationDisplay').textContent,
@@ -1044,7 +1080,7 @@
                     lowerBodyPainRating: lowerBodyPainRating ? parseInt(lowerBodyPainRating) : null,
                     overallAverage: overallAverage && overallAverage !== '--' ? parseFloat(overallAverage) : null,
                     notes,
-                    selectedNotesTags // NEU: Ausgewählte Tags zur Datenbank hinzufügen
+                    selectedNotesTags
                 };
 
                 try {
@@ -1062,6 +1098,40 @@
             document.getElementById('popupOverlay').addEventListener('click', (event) => {
                 if (event.target.id === 'popupOverlay') {
                     closePopup();
+                }
+            });
+
+            // HINZUGEFÜGT: Anmelde-Logik für den Button
+            const signInButton = document.getElementById('signInButton');
+            const userInfoDiv = document.getElementById('userInfo'); // Hole das userInfo Div
+
+            if (signInButton) {
+                signInButton.addEventListener('click', () => {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    auth.signInWithPopup(provider)
+                        .then((result) => {
+                            const user = result.user;
+                            console.log('Angemeldet als:', user.displayName, 'UID:', user.uid);
+                            alert(`Erfolgreich angemeldet als ${user.displayName}! Deine UID ist: ${user.uid}`);
+                            userInfoDiv.textContent = `Angemeldet als: ${user.displayName} (UID: ${user.uid})`;
+                            signInButton.style.display = 'none';
+                        }).catch((error) => {
+                            console.error('Fehler bei der Google-Anmeldung:', error);
+                            alert(`Anmeldefehler: ${error.message}`);
+                        });
+                });
+            }
+
+            // Überprüfen, ob ein Benutzer bereits angemeldet ist
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    console.log('Benutzer ist bereits angemeldet:', user.displayName, 'UID:', user.uid);
+                    userInfoDiv.textContent = `Angemeldet als: ${user.displayName} (UID: ${user.uid})`;
+                    if (signInButton) signInButton.style.display = 'none';
+                } else {
+                    console.log('Kein Benutzer angemeldet.');
+                    userInfoDiv.textContent = 'Nicht angemeldet.';
+                    if (signInButton) signInButton.style.display = 'block';
                 }
             });
         });
